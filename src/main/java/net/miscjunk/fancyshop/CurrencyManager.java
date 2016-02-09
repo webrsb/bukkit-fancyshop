@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import com.comphenix.protocol.wrappers.nbt.NbtWrapper;
 import com.comphenix.protocol.wrappers.nbt.io.NbtTextSerializer;
 
 import java.io.IOException;
@@ -150,12 +151,14 @@ class ProtocolLibHook {
 	
 	public static String getNbtTextSerializer(ItemStack item) {
         item = ProtocolLibHook.getCraftItemStack(item);
-    	NbtCompound tag = NbtFactory.asCompound(NbtFactory.fromItemTag(item));
-    	String textwrape = new NbtTextSerializer().serialize(tag);
+    	NbtCompound base = NbtFactory.asCompound(NbtFactory.fromItemTag(item));    	
+    	String textwrape = new NbtTextSerializer().serialize(base);
         return textwrape;	
 	}
 	
 	public static ItemStack setTagFromText(ItemStack item, String NBTTag) {
+		if(NBTTag.isEmpty())
+			return item;
 		item = ProtocolLibHook.getCraftItemStack(item);
         NbtCompound nbtstr = null;
         try {
@@ -163,7 +166,8 @@ class ProtocolLibHook {
 		} catch (IOException e) {
 			return item;
 		}
-		NbtFactory.setItemTag(item, nbtstr);
+        if(!nbtstr.getKeys().isEmpty())        	
+        	NbtFactory.setItemTag(item, nbtstr);
 		return item;
 	}
 }
